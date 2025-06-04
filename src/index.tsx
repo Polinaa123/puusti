@@ -1,19 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 import GlobalStyle from './globalStyles';
+import reportWebVitals from './reportWebVitals';
+import './index.css';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const container = document.getElementById('root') as HTMLElement;
+const root = ReactDOM.createRoot(container);
+
 root.render(
   <React.StrictMode>
-    <>
-      <GlobalStyle />
+    <GlobalStyle />
+    <BrowserRouter basename="/puusti">
       <App />
-    </>
+    </BrowserRouter>
   </React.StrictMode>
 );
+
 reportWebVitals();

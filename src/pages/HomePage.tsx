@@ -236,17 +236,13 @@ const HomePage: React.FC = () => {
     });
   };
 
-  // При сабмите третьего шага переходим на шаг 4, где показываем summary
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setStep(4);
   };
 
-  // Финальный «Confirm» (можно отправить на сервер или просто показать alert)
   const handleFinalSubmit = () => {
-    // Здесь можете выполнить реальную отправку на сервер.
     alert('Данные успешно отправлены!');
-    // По желанию: сброс формы или перенаправление.
   };
 
   return (
@@ -267,10 +263,8 @@ const HomePage: React.FC = () => {
           <FormContainer>
             <FormTitle>submit your info</FormTitle>
 
-            {/* 1–3 шаги обёрнуты в <form>, но на шаге 4 форма больше не нужна */}
             {step < 4 ? (
               <StyledForm onSubmit={handleSubmit}>
-                {/* ==================== SECTION 1 ==================== */}
                 {step === 1 && (
                   <>
                     <FormGroup>
@@ -439,7 +433,6 @@ const HomePage: React.FC = () => {
                   </>
                 )}
 
-                {/* ================= Навигационные кнопки ================= */}
                 <ButtonRow>
                   {step > 1 && (
                     <SubmitButton type="button" onClick={handleBack}>
@@ -457,11 +450,9 @@ const HomePage: React.FC = () => {
                 </ButtonRow>
               </StyledForm>
             ) : (
-              // ==================== SECTION 4: SUMMARY ====================
               <SummaryContainer>
                 <FormTitle>Review Your Information</FormTitle>
 
-                {/* Section 1 Summary */}
                 <SummaryItem>
                   <span>Property Description:</span> {description}
                 </SummaryItem>
@@ -484,7 +475,6 @@ const HomePage: React.FC = () => {
                   <span>Occupation Days per Year:</span> {occupancyDays}
                 </SummaryItem>
 
-                {/* Section 2 Summary */}
                 {selectedImprovements.includes('photos') && (
                   <SummaryItem>
                     <span>Photos Uploaded:</span>{' '}
@@ -508,7 +498,6 @@ const HomePage: React.FC = () => {
                   <span>Email:</span> {email}
                 </SummaryItem>
 
-                {/* Кнопки для подтверждения или возврата на правку */}
                 <ButtonRow>
                   <SubmitButton type="button" onClick={handleBack}>
                     Back
