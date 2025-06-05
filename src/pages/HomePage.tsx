@@ -9,7 +9,7 @@ const HomeContainer = styled.div`
   align-items: center;
   justify-content: flex-start;
   min-height: calc(100vh - 90px);
-  padding: 140px;
+  padding: 90px;
 `;
 
 const CentralButton = styled.div.attrs({ className: 'central-button' })<any>`
