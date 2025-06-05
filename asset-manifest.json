@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/puusti/static/css/main.e6c13ad2.css",
-    "main.js": "/puusti/static/js/main.6e7eabc1.js",
+    "main.js": "/puusti/static/js/main.71dd18a6.js",
     "static/js/453.128f5e55.chunk.js": "/puusti/static/js/453.128f5e55.chunk.js",
     "index.html": "/puusti/index.html",
     "main.e6c13ad2.css.map": "/puusti/static/css/main.e6c13ad2.css.map",
-    "main.6e7eabc1.js.map": "/puusti/static/js/main.6e7eabc1.js.map",
+    "main.71dd18a6.js.map": "/puusti/static/js/main.71dd18a6.js.map",
     "453.128f5e55.chunk.js.map": "/puusti/static/js/453.128f5e55.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.6e7eabc1.js"
+    "static/js/main.71dd18a6.js"
   ]
 }
