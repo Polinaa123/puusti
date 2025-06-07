@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 interface SliderProps {
@@ -7,198 +7,111 @@ interface SliderProps {
   value: number;
   onChange: (value: number) => void;
   unit?: string;
+  intervals: number[];
 }
 
 const SliderContainer = styled.div`
-  width: 100%;
-  max-width: 700px;
-  padding: 30px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
+  width: 100%;
 `;
 
-const SliderTrack = styled.div`
+const SliderInput = styled.input`
   width: 100%;
+  margin: 10px 0;
+  appearance: none;
+  background: #ddd;
   height: 4px;
-  background-color: #e0e0e0;
   border-radius: 2px;
-  position: relative;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #49ca38;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #49ca38;
+    border-radius: 50%;
+    cursor: pointer;
+  }
 `;
 
-const SliderFill = styled.div<{ fillPercentage: number }>`
-  position: absolute;
-  height: 100%;
-  width: ${props => props.fillPercentage}%;
-  background-color: #49CA38;
-  border-radius: 2px;
-`;
-
-const SliderThumb = styled.div<{ position: number }>`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: white;
-  border: 2px solid #49CA38;
-  position: absolute;
-  top: 50%;
-  left: ${props => props.position}%;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  z-index: 2;
-`;
-
-const SliderMarks = styled.div`
+const SliderLabels = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
   width: 100%;
-`;
-
-const SliderMark = styled.div`
   font-size: 14px;
-  color: #666;
-  position: relative;
-  text-align: center;
+  color: #333;
   font-family: 'Kanit', sans-serif;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1px;
-    height: 8px;
-    background-color: #ccc;
-  }
 `;
 
-const ValueBubble = styled.div<{ position: number; visible: boolean }>`
+const Bubble = styled.div<{ position: number; visible: boolean }>`
   position: absolute;
   top: -30px;
-  left: ${props => props.position}%;
+  left: ${(props) => props.position}%;
   transform: translateX(-50%);
-  background-color: #49CA38;
+  background-color: #49ca38;
   color: white;
-  padding: 4px 8px;
-  border-radius: 50%;
-  font-size: 16px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
   font-family: 'Kanit', sans-serif;
-  z-index: 3;
-  opacity: ${props => props.visible ? 1 : 0};
-  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  transition: left 0.1s ease, opacity 0.3s ease;
+  opacity: ${(props) => (props.visible ? 1 : 0)};
   pointer-events: none;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid #49CA38;
-  }
 `;
 
-const CustomSlider: React.FC<SliderProps> = ({ min, max, value, onChange, unit = '' }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  
-  const getPercentage = (value: number) => {
-    return ((value - min) / (max - min)) * 100;
-  };
-  
-  const getValueFromPosition = (position: number) => {
-    const percentage = position / 100;
-    const value = percentage * (max - min) + min;
-    return Math.round(value);
-  };
-  
-  const handleMouseDown = () => {
-    setIsDragging(true);
-  };
-  
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+const CustomSlider: React.FC<SliderProps> = ({ min, max, value, onChange, unit = '', intervals }) => {
+  const [bubblePosition, setBubblePosition] = useState(0);
+  const [isInteracting, setIsInteracting] = useState(false);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target.value);
+    onChange(newValue);
+    const percentage = ((newValue - min) / (max - min)) * 100;
+    setBubblePosition(percentage);
   };
-  
-  const handleMouseLeave = () => {
-    setIsHovered(false);
+
+  const handleInteractionStart = () => {
+    setIsInteracting(true);
   };
-  
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging && sliderRef.current) {
-        const rect = sliderRef.current.getBoundingClientRect();
-        const position = ((e.clientX - rect.left) / rect.width) * 100;
-        const clampedPosition = Math.max(0, Math.min(position, 100));
-        const newValue = getValueFromPosition(clampedPosition);
-        onChange(newValue);
-      }
-    },
-    [isDragging, min, max, onChange]
-  );
-  
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (sliderRef.current) {
-      const rect = sliderRef.current.getBoundingClientRect();
-      const position = ((e.clientX - rect.left) / rect.width) * 100;
-      const clampedPosition = Math.max(0, Math.min(position, 100));
-      const newValue = getValueFromPosition(clampedPosition);
-      onChange(newValue);
-    }
+
+  const handleInteractionEnd = () => {
+    setIsInteracting(false);
   };
-  
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp]);
-  
-  const percentage = getPercentage(value);
-  const showBubble = isHovered || isDragging;
-  
-  const marks = [min, 90, 180, 270, max].map(mark => (
-    <SliderMark key={mark}>{mark}{unit}</SliderMark>
-  ));
-  
+
   return (
-    <SliderContainer ref={sliderRef} onClick={handleClick}>
-      <ValueBubble 
-        position={percentage}
-        visible={showBubble}
-      >
-        {value}{unit}
-      </ValueBubble>
-      <SliderTrack>
-        <SliderFill fillPercentage={percentage} />
-        <SliderThumb 
-          position={percentage} 
-          onMouseDown={handleMouseDown}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        />
-      </SliderTrack>
-      <SliderMarks>
-        {marks}
-      </SliderMarks>
+    <SliderContainer>
+      <Bubble position={bubblePosition} visible={isInteracting}>
+        {value} {unit}
+      </Bubble>
+      <SliderInput
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        onChange={handleInputChange}
+        onMouseDown={handleInteractionStart}
+        onMouseUp={handleInteractionEnd}
+        onTouchStart={handleInteractionStart}
+        onTouchEnd={handleInteractionEnd}
+      />
+      <SliderLabels>
+        {intervals.map((interval) => (
+          <span key={interval}>{interval} {unit}</span>
+        ))}
+      </SliderLabels>
     </SliderContainer>
   );
 };

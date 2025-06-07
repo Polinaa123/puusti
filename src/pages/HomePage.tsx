@@ -15,7 +15,7 @@ const HomeContainer = styled.div`
 const CentralButton = styled.div.attrs({ className: 'central-button' })<any>`
   width: ${(props) => (props.expanded ? '80vw' : '500px')};
   height: ${(props) => (props.expanded ? 'auto' : '300px')};
-  border: 5px solid #49CA38;
+  border: 5px solid #49ca38;
   border-radius: 2px;
   position: relative;
   cursor: ${(props) => (props.expanded ? 'default' : 'pointer')};
@@ -31,7 +31,7 @@ const ButtonText = styled.span`
   position: absolute;
   bottom: 5px;
   right: 25px;
-  color: #49CA38;
+  color: #49ca38;
   font-size: 28px;
   text-align: center;
   font-style: italic;
@@ -43,7 +43,7 @@ const SideText = styled.div`
   right: -70px;
   top: 30%;
   transform: translateY(-50%) rotate(-90deg);
-  color: #49CA38;
+  color: #49ca38;
   font-size: 16px;
   font-style: italic;
   display: flex;
@@ -57,7 +57,7 @@ const LogoContainer = styled.div`
   left: 5px;
   font-size: 45px;
   font-weight: 900;
-  color: #49CA38;
+  color: #49ca38;
   font-family: 'Kanit', sans-serif;
   pointer-events: none;
 `;
@@ -72,7 +72,7 @@ const FormContainer = styled.div`
 `;
 
 const FormTitle = styled.h2`
-  color: #49CA38;
+  color: #49ca38;
   margin-bottom: 30px;
   font-size: 28px;
   font-family: 'Kanit', sans-serif;
@@ -96,7 +96,7 @@ const Label = styled.label`
   display: flex;
   font-size: 20px;
   font-family: 'Kanit', sans-serif;
-  color: #49CA38;
+  color: #49ca38;
   flex-direction: column;
   align-items: center;
 `;
@@ -114,7 +114,28 @@ const CheckboxLabel = styled.label`
   align-items: center;
   font-size: 18px;
   font-family: 'Kanit', sans-serif;
-  color: #49CA38;
+  color: #49ca38;
+  cursor: pointer;
+
+  input {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #49ca38;
+    border-radius: 4px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+
+    &:checked {
+      background-color: #49ca38;
+      border-color: #49ca38;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(73, 202, 56, 0.5);
+    }
+  }
 `;
 
 const Input = styled.input`
@@ -128,7 +149,7 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #49CA38;
+    border-color: #49ca38;
   }
 `;
 
@@ -144,14 +165,29 @@ const Textarea = styled.textarea`
 
   &:focus {
     outline: none;
-    border-color: #49CA38;
+    border-color: #49ca38;
   }
 `;
 
+const ImagePreviewContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+`;
+
+const PreviewImage = styled.img`
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border: 2px solid #49ca38;
+  border-radius: 4px;
+`;
+
 const SubmitButton = styled.button`
-  background-color: #49CA38;
+  background-color: #49ca38;
   color: white;
-  border: 2px solid #49CA38;
+  border: 2px solid #49ca38;
   padding: 12px 24px;
   font-size: 18px;
   font-weight: bold;
@@ -200,19 +236,24 @@ const HomePage: React.FC = () => {
   const [step, setStep] = useState(1);
 
   const [description, setDescription] = useState('');
-  const improvementOptions = ['photos', 'description', 'seo'];
+  const [location, setLocation] = useState('');
+  const [listingLink, setListingLink] = useState('');
+  const [adTitle, setAdTitle] = useState('');
+  const [interiorDesignNotes, setInteriorDesignNotes] = useState('');
+  const improvementOptions = ['photos', 'description and title', 'interior design'];
   const [selectedImprovements, setSelectedImprovements] = useState<string[]>([]);
   const [seasons, setSeasons] = useState('');
   const [audience, setAudience] = useState('');
   const [customers, setCustomers] = useState('');
-  const [occupancyDays, setOccupancyDays] = useState(180);
+  const [occupancyDays, setOccupancyDays] = useState(0);
+  const [budget, setBudget] = useState(0);
 
   const [adPhotos, setAdPhotos] = useState<FileList | null>(null);
   const [adDescription, setAdDescription] = useState('');
-  const [airbnbLink, setAirbnbLink] = useState('');
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleClick = () => {
     setShowForm(true);
@@ -242,7 +283,19 @@ const HomePage: React.FC = () => {
   };
 
   const handleFinalSubmit = () => {
-    alert('Данные успешно отправлены!');
+    alert('data is sent successfully');
+  };
+
+  const renderImagePreviews = () => {
+    if (!adPhotos) return null;
+    return (
+      <ImagePreviewContainer>
+        {Array.from(adPhotos).map((file, idx) => {
+          const url = URL.createObjectURL(file);
+          return <PreviewImage key={idx} src={url} alt={`preview-${idx}`} />;
+        })}
+      </ImagePreviewContainer>
+    );
   };
 
   return (
@@ -268,15 +321,36 @@ const HomePage: React.FC = () => {
                 {step === 1 && (
                   <>
                     <FormGroup>
-                      <Label htmlFor="description">
-                        tell us abt your property
-                      </Label>
+                      <Label htmlFor="description">tell us abt your property</Label>
                       <Input
                         type="text"
                         id="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         required
+                      />
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="location">location of your listing</Label>
+                      <Input
+                        type="text"
+                        id="location"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="e.g. Helsinki, Finland"
+                        required
+                      />
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="listingLink">listing link (if any)</Label>
+                      <Input
+                        type="url"
+                        id="listingLink"
+                        value={listingLink}
+                        onChange={(e) => setListingLink(e.target.value)}
+                        placeholder="https://www.example.com/your-listing/..."
                       />
                     </FormGroup>
 
@@ -291,16 +365,14 @@ const HomePage: React.FC = () => {
                               checked={selectedImprovements.includes(option)}
                               onChange={() => handleImprovementChange(option)}
                             />
-                            &nbsp;{option}
+                            {option}
                           </CheckboxLabel>
                         ))}
                       </CheckboxGroup>
                     </FormGroup>
 
                     <FormGroup>
-                      <Label htmlFor="seasons">
-                        which seasons are the most important?
-                      </Label>
+                      <Label htmlFor="seasons">which seasons are the most important?</Label>
                       <Input
                         type="text"
                         id="seasons"
@@ -312,9 +384,7 @@ const HomePage: React.FC = () => {
                     </FormGroup>
 
                     <FormGroup>
-                      <Label htmlFor="audience">
-                        who is your target audience?
-                      </Label>
+                      <Label htmlFor="audience">who is your target audience?</Label>
                       <Input
                         type="text"
                         id="audience"
@@ -326,9 +396,7 @@ const HomePage: React.FC = () => {
                     </FormGroup>
 
                     <FormGroup>
-                      <Label htmlFor="customers">
-                        are your customers fins or others?
-                      </Label>
+                      <Label htmlFor="customers">are your customers fins or others?</Label>
                       <Input
                         type="text"
                         id="customers"
@@ -340,27 +408,36 @@ const HomePage: React.FC = () => {
                     </FormGroup>
 
                     <FormGroup>
-                      <Label htmlFor="occupancy">
-                        occupation days per year?
-                      </Label>
+                      <Label htmlFor="occupancy">occupation days per year?</Label>
                       <CustomSlider
                         min={0}
                         max={365}
                         value={occupancyDays}
                         onChange={setOccupancyDays}
+                        unit=""
+                        intervals={[0, 90, 180, 270, 365]}
+                      />
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="budget">your budget (EUR)</Label>
+                      <CustomSlider
+                        min={0}
+                        max={1000}
+                        value={budget}
+                        onChange={setBudget}
+                        unit="€"
+                        intervals={[0, 250, 500, 750, 1000]}
                       />
                     </FormGroup>
                   </>
                 )}
 
-                {/* ==================== SECTION 2 ==================== */}
                 {step === 2 && (
                   <>
                     {selectedImprovements.includes('photos') && (
                       <FormGroup>
-                        <Label htmlFor="adPhotos">
-                          add photos from your listing
-                        </Label>
+                        <Label htmlFor="adPhotos">add photos from your listing</Label>
                         <Input
                           type="file"
                           id="adPhotos"
@@ -368,47 +445,56 @@ const HomePage: React.FC = () => {
                           accept="image/*"
                           onChange={(e) => setAdPhotos(e.target.files)}
                         />
+                        {renderImagePreviews()}
                       </FormGroup>
                     )}
 
-                    {selectedImprovements.includes('description') && (
+                    {selectedImprovements.includes('description and title') && (
+                      <>
+                        <FormGroup>
+                          <Label htmlFor="adDescription">description from the listing</Label>
+                          <Textarea
+                            id="adDescription"
+                            rows={4}
+                            value={adDescription}
+                            onChange={(e) => setAdDescription(e.target.value)}
+                            placeholder="paste your current ad description here..."
+                            required
+                          />
+                        </FormGroup>
+                        <FormGroup>
+                          <Label htmlFor="adTitle">title from the listing</Label>
+                          <Input
+                            type="text"
+                            id="adTitle"
+                            value={adTitle}
+                            onChange={(e) => setAdTitle(e.target.value)}
+                            placeholder="enter your ad title here..."
+                            required
+                          />
+                        </FormGroup>
+                      </>
+                    )}
+
+                    {selectedImprovements.includes('interior design') && (
                       <FormGroup>
-                        <Label htmlFor="adDescription">
-                          problematic ad description (copy from Airbnb)
-                        </Label>
+                        <Label htmlFor="interiorDesignNotes">interior design notes</Label>
                         <Textarea
-                          id="adDescription"
-                          rows={4}
-                          value={adDescription}
-                          onChange={(e) => setAdDescription(e.target.value)}
-                          placeholder="Paste your Airbnb ad description here..."
-                          required
+                          id="interiorDesignNotes"
+                          rows={3}
+                          value={interiorDesignNotes}
+                          onChange={(e) => setInteriorDesignNotes(e.target.value)}
+                          placeholder="leave any notes related to interior design here..."
                         />
                       </FormGroup>
                     )}
-
-                    {/* Airbnb Link — всегда */}
-                    <FormGroup>
-                      <Label htmlFor="airbnbLink">
-                        Airbnb listing link
-                      </Label>
-                      <Input
-                        type="url"
-                        id="airbnbLink"
-                        value={airbnbLink}
-                        onChange={(e) => setAirbnbLink(e.target.value)}
-                        placeholder="https://www.airbnb.com/rooms/..."
-                        required
-                      />
-                    </FormGroup>
                   </>
                 )}
 
-                {/* ==================== SECTION 3 ==================== */}
                 {step === 3 && (
                   <>
                     <FormGroup>
-                      <Label htmlFor="fullName">your full name, pleaseee</Label>
+                      <Label htmlFor="fullName">your full name, please</Label>
                       <Input
                         type="text"
                         id="fullName"
@@ -419,9 +505,7 @@ const HomePage: React.FC = () => {
                     </FormGroup>
 
                     <FormGroup>
-                      <Label htmlFor="email">
-                        email where we will contact you back
-                      </Label>
+                      <Label htmlFor="email">email where we will contact you</Label>
                       <Input
                         type="email"
                         id="email"
@@ -430,80 +514,120 @@ const HomePage: React.FC = () => {
                         required
                       />
                     </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="phoneNumber">phone number</Label>
+                      <Input
+                        type="tel"
+                        id="phoneNumber"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="+358 ..."
+                        required
+                      />
+                    </FormGroup>
                   </>
                 )}
 
+                {/* button raw*/}
                 <ButtonRow>
                   {step > 1 && (
                     <SubmitButton type="button" onClick={handleBack}>
-                      Back
+                      back
                     </SubmitButton>
                   )}
 
                   {step < 3 && (
                     <SubmitButton type="button" onClick={handleNext}>
-                      Next
+                      next
                     </SubmitButton>
                   )}
 
-                  {step === 3 && <SubmitButton type="submit">Submit</SubmitButton>}
+                  {step === 3 && (
+                    <SubmitButton type="submit">submit</SubmitButton>
+                  )}
                 </ButtonRow>
               </StyledForm>
             ) : (
+              /* summary*/
               <SummaryContainer>
-                <FormTitle>Review Your Information</FormTitle>
+                <FormTitle>review your information</FormTitle>
 
                 <SummaryItem>
-                  <span>Property Description:</span> {description}
+                  <span>property description:</span> {description}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Improvements:</span>{' '}
+                  <span>location:</span> {location}
+                </SummaryItem>
+                <SummaryItem>
+                  <span>listing link:</span>{' '}
+                  {listingLink ? (
+                    <a href={listingLink} target="_blank" rel="noreferrer">
+                      {listingLink}
+                    </a>
+                  ) : (
+                    '—'
+                  )}
+                </SummaryItem>
+                <SummaryItem>
+                  <span>improvements:</span>{' '}
                   {selectedImprovements.length > 0
                     ? selectedImprovements.join(', ')
                     : '—'}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Seasons:</span> {seasons}
+                  <span>seasons:</span> {seasons}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Target Audience:</span> {audience}
+                  <span>target audience:</span> {audience}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Customers (fins or others):</span> {customers}
+                  <span>customers (fins or others):</span> {customers}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Occupation Days per Year:</span> {occupancyDays}
+                  <span>occupation days per year:</span> {occupancyDays}
+                </SummaryItem>
+                <SummaryItem>
+                  <span>budget (eur):</span> {budget}€
                 </SummaryItem>
 
                 {selectedImprovements.includes('photos') && (
                   <SummaryItem>
-                    <span>Photos Uploaded:</span>{' '}
-                    {adPhotos ? adPhotos.length + ' file(s)' : '0'}
-                  </SummaryItem>
+                    <span>photos uploaded:</span>
+                    {adPhotos && adPhotos.length > 0 ? (
+                      <ImagePreviewContainer>
+                        {Array.from(adPhotos).map((file, idx) => {
+                          const url = URL.createObjectURL(file);
+                          return <PreviewImage key={idx} src={url} alt={`preview-${idx}`} />;
+                        })}
+                      </ImagePreviewContainer>
+                    ) : (
+                      'no photos uploaded'
+                    )}
+                  </SummaryItem>  
                 )}
+
                 {selectedImprovements.includes('description') && (
                   <SummaryItem>
-                    <span>Description:</span> {adDescription}
+                    <span>description:</span> {adDescription}
                   </SummaryItem>
                 )}
                 <SummaryItem>
-                  <span>Airbnb Link:</span> {airbnbLink}
-                </SummaryItem>
-
-                {/* Section 3 Summary */}
-                <SummaryItem>
-                  <span>Full Name:</span> {fullName}
+                  <span>full name:</span> {fullName}
                 </SummaryItem>
                 <SummaryItem>
-                  <span>Email:</span> {email}
+                  <span>email:</span> {email}
+                </SummaryItem>
+                <SummaryItem>
+                  <span>phone number:</span> {phoneNumber}
                 </SummaryItem>
 
                 <ButtonRow>
                   <SubmitButton type="button" onClick={handleBack}>
-                    Back
+                    back
                   </SubmitButton>
                   <SubmitButton type="button" onClick={handleFinalSubmit}>
-                    Confirm &amp; Send
+                    confirm &amp; send
                   </SubmitButton>
                 </ButtonRow>
               </SummaryContainer>
