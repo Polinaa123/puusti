@@ -88,7 +88,7 @@ export default function Account() {
                 <p><strong>phone:</strong> {profile.phone}</p>
                 <p><strong>location:</strong> {profile.location}</p>
                 <p><strong>services:</strong> {profile.services?.join(', ')}</p>
-                <p><strong>hourly rate:</strong> ${profile.hourlyRate}</p>
+                <p><strong>hourly rate:</strong> €{profile.hourlyRate}</p>
                 <p><strong>experience:</strong> {profile.experience}</p>
                 <p>
                 <strong>portfolio:</strong>{' '}

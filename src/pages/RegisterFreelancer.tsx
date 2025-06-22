@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../services/firebase";
 import { uploadFile } from '../services/storage';
+import { geocodeAddress } from '../services/geoCode';
 
 const SERVICE_OPTIONS = [
     'photography',
@@ -42,6 +43,7 @@ export default function RegisterFreelancer() {
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, password);
             const uid = cred.user.uid;
+            const {lat, lng} = await geocodeAddress(location);
             const urls = await Promise.all(
                 attachments.map(file => uploadFile(uid, file))
             );
@@ -51,6 +53,7 @@ export default function RegisterFreelancer() {
                 email,
                 phone,
                 location,
+                coords: {lat, lng},
                 services,
                 hourlyRate,
                 experience,
@@ -100,7 +103,7 @@ export default function RegisterFreelancer() {
                     required
                 />
 
-            <label>location:</label>
+            <label>location (city, country):</label>
                 <input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
