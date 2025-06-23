@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 export interface LatLng {
   lat: number;
   lng: number;
