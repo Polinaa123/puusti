@@ -18,7 +18,6 @@ type ListingType = 'rent' | 'sale';
 
 export default function ListingRequestForm() {
   const navigate = useNavigate();
-
   const [step, setStep] = useState<1|2>(1);
 
   // form state
@@ -32,7 +31,7 @@ export default function ListingRequestForm() {
   const [budget, setBudget] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [canditates, setCandidates] = useState<any[]>([]);
+  const [canditates, setCandidates] = useState<(FreelancerProfile & {distance: number})[]>([]);
 
   // toggle checkbox
   const toggleService = (s: string) => {
@@ -44,35 +43,34 @@ export default function ListingRequestForm() {
   };
 
   const handleNext = async () => {
-    setError(null);
     if (!location || services.length === 0) {
       setError('please fill location and choose at least one service.');
       return;
     }
     try {
-      const list = await fetchFreelancers(
-        services[0],
-        location,
-        50
-      );
+      console.log('⏩ services из формы:', services);
+      console.log('⏩ location из формы:', location);
+      const list = await fetchFreelancers(services, location, 100);
+      console.log('🏁 final candidates:', list);
       setCandidates(list);
       setStep(2);
+      setError(null);
     } catch (e: any) {
       setError(e.message);
     }
   };
 
-  const handleConfirm = async (freelancer: FreelancerProfile) => {
+  const handleConfirm = async (freelancer: FreelancerProfile & { distance: number}) => {
+    if (!auth.currentUser){
+      setError('you must be logged in to submit a listing');
+      return;
+    }
     setError(null);
     try {
-      const user = auth.currentUser;
-      if (!user) throw new Error('you must be logged in to submit a listing');
-      const uid = user.uid;
+      const uid = auth.currentUser.uid;
 
       // upload photos to Storage
-      const photoUrls = await Promise.all(
-        photos.map(file => uploadFile(uid, file))
-      );
+      const photoUrls = await Promise.all(photos.map(file => uploadFile(uid, file)));
 
       // save to Firestore under users/{uid}/listings
       await addDoc(collection(db, 'users', uid, 'listings'), {

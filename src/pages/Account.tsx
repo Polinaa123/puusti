@@ -126,14 +126,14 @@ export default function Account() {
                     )}
                     </div>
                 ))}
-                <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                    <button onClick={handleLogout}>logout</button>
-                    <button onClick={() => navigate('/client-form')}>
-                        puust the listing
-                    </button>
-                </div>
             </>
             )}
+            <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                <button onClick={handleLogout}>logout</button>
+                <button onClick={() => navigate('/client-form')}>
+                    puust the listing
+                </button>
+            </div>
         </div>
       );
     }

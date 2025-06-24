@@ -14,6 +14,7 @@ export async function geocodeAddress(address: string): Promise<LatLng> {
   const url =
     `https://maps.googleapis.com/maps/api/geocode/json`
     + `?address=${encodeURIComponent(address)}`
+    + `&components=country:FI|country:LV`
     + `&key=${encodeURIComponent(key)}`;
 
   const res = await fetch(url);

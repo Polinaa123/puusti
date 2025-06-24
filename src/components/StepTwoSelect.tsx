@@ -1,18 +1,9 @@
 import React from 'react';
-import Button from './Button';
+import type { FreelancerProfile } from '../services/freelancers';
 
-export interface FreelancerProfile {
-    uid: string;
-    name: string;
-    phone: string;
-    coords: { lat: number; lng: number };
-    hourlyRate: number;
-    services: string[];
-    distance: number;
-}
 interface StepTwoSelectProps {
-    candidates: FreelancerProfile[];
-    onSelect: (freelancer: FreelancerProfile) => void;
+    candidates: Array<FreelancerProfile & {distance: number}>;
+    onSelect: (freelancer: FreelancerProfile & { distance: number }) => void | Promise<void>;
     onBack: () => void;
 }
 export default function StepTwoSelect({ candidates, onSelect, onBack}: StepTwoSelectProps){
@@ -25,9 +16,9 @@ export default function StepTwoSelect({ candidates, onSelect, onBack}: StepTwoSe
             {candidates.length === 0 ? (
                 <p>no professionals found in your area</p>
             ) : (
-                candidates.map(fr => (
+                candidates.map(f => (
                     <div
-                        key={fr.uid}
+                        key={f.uid}
                         style={{
                         border: '1px solid #ddd',
                         borderRadius: 4,
@@ -36,10 +27,10 @@ export default function StepTwoSelect({ candidates, onSelect, onBack}: StepTwoSe
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         }}
                     >
-                        <p><strong>{fr.name}</strong> – {fr.distance.toFixed(1)} km away</p>
-                        <p>phone: {fr.phone}</p>
-                        <p>rate: €{fr.hourlyRate}/h</p>
-                        <button onClick={() => onSelect(fr)} style={{ marginTop: '0.5rem' }}>
+                        <p><strong>{f.name}</strong> – {f.distance.toFixed(1)} km away</p>
+                        <p>phone: {f.phone}</p>
+                        <p>rate: €{f.hourlyRate}/h</p>
+                        <button onClick={() => onSelect(f)} style={{ marginTop: '0.5rem' }}>
                             select
                         </button>
                     </div>

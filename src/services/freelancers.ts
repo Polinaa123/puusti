@@ -1,6 +1,6 @@
-import {collection, query, where, getDocs} from 'firebase/firestore';
+import {collection, getDocs, query, where} from 'firebase/firestore';
 import {db} from './firebase';
-import { geocodeAddress } from './geoCode';
+import {geocodeAddress, LatLng} from './geoCode';
 
 function haversineDistance(
     {lat: lat1, lng: lon1}: {lat: number, lng: number},
@@ -21,34 +21,40 @@ function haversineDistance(
 export interface FreelancerProfile{
     uid: string;
     name: string;
+    email: string;
     phone: string;
-    coords: {lat: number, lng: number};
+    coords: LatLng;
     hourlyRate: number;
     services: string[];
 }
 
 export async function fetchFreelancers(
-    service: string,
+    services: string[],
     clientAddress: string,
     radiusKM: number
 ): Promise<(FreelancerProfile & {distance: number})[]> {
-    const { lat, lng } = await geocodeAddress(clientAddress);
-    const q= query(
-        collection(db, 'freelancers'),
-        where('services', 'array-contains', service)
-    );
+    const clientCoords = await geocodeAddress(clientAddress);
+    const q= query(collection(db, 'freelancers'), where('role', '==', 'freelancer'), where('services', 'array-contains-any', services));
     const snap = await getDocs(q);
-
     const candidates: (FreelancerProfile & { distance: number })[] = [];
     snap.forEach(doc => {
-        const f = doc.data() as FreelancerProfile;
-        const distance = haversineDistance(
-            { lat, lng },
-            { lat: f.coords.lat, lng: f.coords.lng }
-        );
+
+        const fData = doc.data() as Omit<FreelancerProfile, 'uid'>;
+        const distance = haversineDistance(clientCoords, fData.coords);
+
+        console.log('▶ Проверяем фрилансера:', doc.id);
+        console.log('   services:', fData.services);
+        console.log('   coords:', fData.coords, ' vs clientCoords:', clientCoords);
+
+        console.log('   расстояние (км):', distance.toFixed(1), 'макс:', radiusKM);
         if (distance <= radiusKM) {
-            candidates.push({ ...f, distance });
+            candidates.push({uid: doc.id, ...fData, distance });
+            console.log('   ↳ пропускаем — далее радиуса');
+            return;
         }
+        console.log('   ✅ добавляем в кандидаты');
+        candidates.push({ uid: doc.id, ...fData, distance });
     });
+    console.log('🏁 Всего кандидатов:', candidates.length, candidates);
     return candidates.sort((a, b) => a.distance - b.distance);
 }
