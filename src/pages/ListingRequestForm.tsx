@@ -5,12 +5,12 @@ import { uploadFile } from '../services/storage';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import {fetchFreelancers, FreelancerProfile} from '../services/freelancers';
 import StepTwoSelect from '../components/StepTwoSelect';
-import { geocodeAddress } from "../services/geoCode";
 
 const SERVICE_OPTIONS = [
   'photography',
   'copywriting',
   'interior design',
+  'social media marketing',
 ];
 const ROOM_OPTIONS = ['1','2','3','4','5+','studio'];
 
@@ -48,10 +48,7 @@ export default function ListingRequestForm() {
       return;
     }
     try {
-      console.log('⏩ services из формы:', services);
-      console.log('⏩ location из формы:', location);
       const list = await fetchFreelancers(services, location, 100);
-      console.log('🏁 final candidates:', list);
       setCandidates(list);
       setStep(2);
       setError(null);
@@ -69,10 +66,8 @@ export default function ListingRequestForm() {
     try {
       const uid = auth.currentUser.uid;
 
-      // upload photos to Storage
       const photoUrls = await Promise.all(photos.map(file => uploadFile(uid, file)));
 
-      // save to Firestore under users/{uid}/listings
       await addDoc(collection(db, 'users', uid, 'listings'), {
         type,
         location,
@@ -86,8 +81,11 @@ export default function ListingRequestForm() {
         assignedFreelancer:{
           uid: freelancer.uid,
           name: freelancer.name,
+          email: freelancer.email,
           phone: freelancer.phone,
           hourlyRate: freelancer.hourlyRate,
+          services: freelancer.services,
+          coords: freelancer.coords,
         },
         status: 'pending',
         createdAt: serverTimestamp(),

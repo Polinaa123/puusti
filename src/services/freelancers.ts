@@ -1,5 +1,5 @@
-import {collection, getDocs, query, where} from 'firebase/firestore';
-import {db} from './firebase';
+import {collection, getDocs, query, where, getFirestore} from 'firebase/firestore';
+import {db, app} from './firebase';
 import {geocodeAddress, LatLng} from './geoCode';
 
 function haversineDistance(
@@ -24,8 +24,12 @@ export interface FreelancerProfile{
     email: string;
     phone: string;
     coords: LatLng;
-    hourlyRate: number;
     services: string[];
+    description: string;
+    experience: 'junior'|'mid'|'senior';
+    hourlyRate: number;
+    portfolioLink: string[];
+    attachments: string[];
 }
 
 export async function fetchFreelancers(
@@ -34,27 +38,32 @@ export async function fetchFreelancers(
     radiusKM: number
 ): Promise<(FreelancerProfile & {distance: number})[]> {
     const clientCoords = await geocodeAddress(clientAddress);
-    const q= query(collection(db, 'freelancers'), where('role', '==', 'freelancer'), where('services', 'array-contains-any', services));
+    const db = getFirestore(app);
+    const q= query(collection(db, 'users'), where('role', '==', 'freelancer'), where('services', 'array-contains-any', services));
     const snap = await getDocs(q);
     const candidates: (FreelancerProfile & { distance: number })[] = [];
+
     snap.forEach(doc => {
+        const fData = doc.data() as any
+        const f: FreelancerProfile = {
+            uid: doc.id,
+            name: fData.name,
+            email: fData.email,
+            phone: fData.phone,
+            coords: fData.coords,
+            services: fData.services,
+            description: fData.description,
+            experience: fData.experience,
+            hourlyRate: Number(fData.hourlyRate),
+            portfolioLink: fData.portfolioLink || '',
+            attachments: fData.attachments || []
+        };
 
-        const fData = doc.data() as Omit<FreelancerProfile, 'uid'>;
-        const distance = haversineDistance(clientCoords, fData.coords);
+        const distance = haversineDistance(clientCoords, f.coords);
 
-        console.log('▶ Проверяем фрилансера:', doc.id);
-        console.log('   services:', fData.services);
-        console.log('   coords:', fData.coords, ' vs clientCoords:', clientCoords);
-
-        console.log('   расстояние (км):', distance.toFixed(1), 'макс:', radiusKM);
         if (distance <= radiusKM) {
-            candidates.push({uid: doc.id, ...fData, distance });
-            console.log('   ↳ пропускаем — далее радиуса');
-            return;
+            candidates.push({...f, distance});
         }
-        console.log('   ✅ добавляем в кандидаты');
-        candidates.push({ uid: doc.id, ...fData, distance });
-    });
-    console.log('🏁 Всего кандидатов:', candidates.length, candidates);
-    return candidates.sort((a, b) => a.distance - b.distance);
+    })
+    return candidates
 }

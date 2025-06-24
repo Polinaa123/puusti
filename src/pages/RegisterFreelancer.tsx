@@ -18,6 +18,7 @@ export default function RegisterFreelancer() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
+    const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
     const [services, setServices] = useState<string[]>([]);
     const [hourlyRate, setHourlyRate] = useState('');
@@ -55,6 +56,7 @@ export default function RegisterFreelancer() {
                 location,
                 coords: {lat, lng},
                 services,
+                description,
                 hourlyRate,
                 experience,
                 portfolioLink,
@@ -123,6 +125,14 @@ export default function RegisterFreelancer() {
                     </label>
                 ))}
             </fieldset>
+
+            <label className="block mb-1">Краткое описание</label>
+            <textarea
+                className="w-full border rounded p-2 mb-4"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="tell about yourself (background, experience, approaches etc.)"
+            />
 
             <label>hourly rate (eur):</label>
                 <input
