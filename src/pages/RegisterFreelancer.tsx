@@ -10,6 +10,7 @@ const SERVICE_OPTIONS = [
     'photography',
     'interior design',
     'copywriting',
+    'social media marketing'
 ];
 
 export default function RegisterFreelancer() {
@@ -126,7 +127,7 @@ export default function RegisterFreelancer() {
                 ))}
             </fieldset>
 
-            <label className="block mb-1">Краткое описание</label>
+            <label className="block mb-1">description</label>
             <textarea
                 className="w-full border rounded p-2 mb-4"
                 value={description}
@@ -162,7 +163,7 @@ export default function RegisterFreelancer() {
                         checked={experience === 'mid'}
                         onChange={() => setExperience('mid')}
                     />
-                    Mid‐level
+                    middle level
                 </label>
                 <label>
                     <input
@@ -172,7 +173,7 @@ export default function RegisterFreelancer() {
                         checked={experience === 'senior'}
                         onChange={() => setExperience('senior')}
                     />
-                    Senior
+                    senior
                 </label>
             </fieldset>
 

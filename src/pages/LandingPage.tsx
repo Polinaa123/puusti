@@ -12,7 +12,7 @@ export default function LandingPage() {
       <div style = {{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem'}}>
         <Button onClick={() => {
           if (user) {
-            navigate('/client-form');
+            navigate('/create-listing');
           } else {
             navigate('/auth/client');
           }

@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../services/firebase';
 import { uploadFile } from '../services/storage';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import {fetchFreelancers, FreelancerProfile} from '../services/freelancers';
-import StepTwoSelect from '../components/StepTwoSelect';
 
 const SERVICE_OPTIONS = [
   'photography',
@@ -18,7 +16,6 @@ type ListingType = 'rent' | 'sale';
 
 export default function ListingRequestForm() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<1|2>(1);
 
   // form state
   const [type, setType] = useState<ListingType>('rent');
@@ -31,7 +28,6 @@ export default function ListingRequestForm() {
   const [budget, setBudget] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [canditates, setCandidates] = useState<(FreelancerProfile & {distance: number})[]>([]);
 
   // toggle checkbox
   const toggleService = (s: string) => {
@@ -42,33 +38,17 @@ export default function ListingRequestForm() {
     if (e.target.files) setPhotos(Array.from(e.target.files));
   };
 
-  const handleNext = async () => {
-    if (!location || services.length === 0) {
-      setError('please fill location and choose at least one service.');
-      return;
-    }
-    try {
-      const list = await fetchFreelancers(services, location, 100);
-      setCandidates(list);
-      setStep(2);
-      setError(null);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  };
-
-  const handleConfirm = async (freelancer: FreelancerProfile & { distance: number}) => {
-    if (!auth.currentUser){
-      setError('you must be logged in to submit a listing');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if(!auth.currentUser){
+      setError('Please fill location and choose at least one service');
       return;
     }
     setError(null);
-    try {
+    try{
       const uid = auth.currentUser.uid;
-
-      const photoUrls = await Promise.all(photos.map(file => uploadFile(uid, file)));
-
-      await addDoc(collection(db, 'users', uid, 'listings'), {
+      const photoUrls = await Promise.all(photos.map(f => uploadFile(uid, f)));
+      await addDoc(collection(db, 'listings'), {
         type,
         location,
         rooms,
@@ -78,37 +58,18 @@ export default function ListingRequestForm() {
         services,
         budget,
         photoUrls,
-        assignedFreelancer:{
-          uid: freelancer.uid,
-          name: freelancer.name,
-          email: freelancer.email,
-          phone: freelancer.phone,
-          hourlyRate: freelancer.hourlyRate,
-          services: freelancer.services,
-          coords: freelancer.coords,
-        },
+        clientId: uid,
         status: 'pending',
         createdAt: serverTimestamp(),
       });
-
-      navigate('/account');
-    } catch (e: any) {
-      setError(e.message);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
-  if (step===2){
-    return(
-      <StepTwoSelect
-        candidates={canditates}
-        onSelect={handleConfirm}
-        onBack={() => setStep(1)}
-      />
-    );
-  }
-
   return (
-    <form onSubmit={e => {e.preventDefault(); handleNext();}} style={{ padding: '1rem', maxWidth: 600, margin: 'auto' }}>
+    <form onSubmit={handleSubmit} style={{ padding: '1rem', maxWidth: 600, margin: 'auto' }}>
       <h2>new listing request</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
@@ -155,11 +116,7 @@ export default function ListingRequestForm() {
       <label>upload photos</label>
       <input type="file" multiple onChange={handlePhotos} />
 
-      <button type="submit" style={{ marginTop: '1rem' }}>next</button>
+      <button type="submit" style={{ marginTop: '1rem' }}>submit</button>
     </form>
   );
-}
-
-function setError(message: any) {
-  throw new Error('Function not implemented.');
 }

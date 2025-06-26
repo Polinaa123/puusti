@@ -19,7 +19,7 @@ export default function Login() {
             console.log('User logged in:', cred.user.uid);
             const from = (location.state as any)?.from?.pathname || '/account';
             if (from === '/auth/client') {
-                navigate('/client-form', { replace: true });
+                navigate('/create-listing', { replace: true });
             } else {
                 navigate(from, { replace: true });
             }

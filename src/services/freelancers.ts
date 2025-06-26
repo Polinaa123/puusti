@@ -64,6 +64,6 @@ export async function fetchFreelancers(
         if (distance <= radiusKM) {
             candidates.push({...f, distance});
         }
-    })
-    return candidates
+    });
+    return candidates;
 }

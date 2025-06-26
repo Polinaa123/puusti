@@ -29,7 +29,7 @@ export default function RegisterClient() {
 
             const from = (location.state as any)?.from?.pathname || '/account';
             if (from === '/auth/client') {
-            navigate('/client-form', { replace: true });
+            navigate('/create-listing', { replace: true });
             } else {
             navigate(from, { replace: true });
             }

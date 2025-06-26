@@ -9,6 +9,8 @@ import Account from '../pages/Account';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ListingRequestForm from '../pages/ListingRequestForm';
 import RoleSelection from '../pages/RoleSelection';
+import Dashboard from '../pages/Dashboard';
+import FindFreelancer from '../pages/FindFreelancer';
 
 export default function App() {
   return (
@@ -21,7 +23,9 @@ export default function App() {
       <Route path="/auth/client" element={<AuthSelection role = "client"/>} />
       <Route path="/auth/freelancer" element={<AuthSelection role = "freelancer"/>} />
       <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-      <Route path="/client-form" element={<ProtectedRoute requiredRole='client'><ListingRequestForm/></ProtectedRoute>}/>
+      <Route path="/create-listing" element={<ProtectedRoute requiredRole='client'><ListingRequestForm/></ProtectedRoute>}/>
+      <Route path="/dashboard" element={<ProtectedRoute requiredRole='client'><Dashboard /></ProtectedRoute>}/>
+      <Route path="/find-freelancer/:listingId" element={<ProtectedRoute requiredRole='client'><FindFreelancer /></ProtectedRoute>}/>
     </Routes>
   );
 }

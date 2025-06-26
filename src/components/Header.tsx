@@ -60,6 +60,17 @@ export default function Header() {
       >
         account
       </NavLink>
+
+      <NavLink
+        to="/dashboard"
+        style={({ isActive }) =>
+          isActive
+            ? { ...linkStyle, ...activeLinkStyle }
+            : linkStyle
+        }
+      >
+        dashboard
+      </NavLink>
     </header>
   );
 }
